@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="all">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>测试图片地址</title>
+</head>
+<script>
+    (function (doc, win) {
+        var docEl = doc.documentElement,
+            resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+            recalc = function () {
+                var clientWidth = docEl.clientWidth;
+                if (!clientWidth) return;
+                docEl.style.fontSize = 100 * (clientWidth / 750) + 'px';
+            };
+        if (!doc.addEventListener) return;
+        win.addEventListener(resizeEvt, recalc, false);
+        doc.addEventListener('DOMContentLoaded', recalc, false);
+    })(document, window);
+</script>
+
+<body>
+    <input type="file" id="imgElement">
+
+
+</body>
+<script src="./jquery.min.js"></script>
+<script src="./exif.js"></script>
+<script>
+    $(function () {
+        var fileInput = $('#imgElement');
+        var oFile = new FileReader();
+        var passFileType = /^(?:image\/bmp|image\/gif|image\/jpeg|image\/png)$/i;
+
+
+        fileInput.on('change', function (e) {
+            if (!e.target || !e.target.files.length || !e.target.files[0]) {
+                return
+            };
+
+
+            var _file = e.target.files[0];
+
+            console.log(_file)
+
+            if (!passFileType.test(_file.type)) {
+                return
+            };
+
+            oFile.readAsDataURL(_file);
+
+            EXIF.getData(_file, function () {
+                var _dataTxt = EXIF.pretty(this);
+                var _dataJson = JSON.stringify(EXIF.getAllTags(this));
+
+                console.log(_dataJson)
+                console.log(_dataTxt)
+
+                var _rotate = 0;
+                var _orientation = EXIF.getTag(this, 'Orientation');
+
+                if (_orientation == 3) {
+                    _rotate = 180;
+                } else if (_orientation == 6) {
+                    _rotate = 90;
+                } else if (_orientation == 8) {
+                    _rotate = 270;
+                };
+
+            });
+        });
+
+
+    })
+</script>
+
+</html>
